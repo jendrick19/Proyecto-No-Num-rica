@@ -1,88 +1,100 @@
 #include <iostream>
 #include <string>
+#include "Pila.h"
 #include "Cola.h"
+#include "Lista.h"
 
 using namespace std;
 
-template <class Tipo>
-void mostrarCola(Cola<Tipo> &c, Tipo marca) { // El PDF pide pasar una marca
-    if (c.Vacia()) {
-        cout << "La fila esta vacia." << endl;
-        return;
+// --- RUTINAS A NIVEL DE APLICACIÓN ---
+
+// Impresión de Pila: Usa una pila auxiliar para no destruir los datos
+void probarPila(Pila<string> &p) {
+    Pila<string> aux;
+    string valor;
+    cout << "TOP -> ";
+    while (p.Remover(valor)) {
+        cout << "[" << valor << "] " << endl;
+        aux.Insertar(valor);
     }
+    while (aux.Remover(valor)) p.Insertar(valor); // Restaurar
+}
 
-    Tipo valor;
-    bool encontro = false;
-
-    c.Insertar(marca); // Se inserta la marca al final antes de empezar
+// Impresión de Cola: Usa la técnica de la "marca"
+void probarCola(Cola<string> &c) {
+    string marca = "###";
+    string valor;
+    bool fin = false;
+    if (c.Vacia()) return;
+    c.Insertar(marca); // Insertar marca al final
     cout << "FRENTE -> ";
-
-    while (!encontro) {
-        c.Remover(valor); // Sacamos el elemento
-        
-        if (valor == marca) { // Si es la marca, ya dimos la vuelta completa
-            encontro = true;
-        } else {
-            cout << "[" << valor << "] -> "; // Procesamos/Imprimimos
-            c.Insertar(valor); // Lo reinsertamos al final
+    while (!fin) {
+        c.Remover(valor);
+        if (valor == marca) fin = true;
+        else {
+            cout << "[" << valor << "] -> ";
+            c.Insertar(valor); // Reinsertar
         }
     }
     cout << "FINAL" << endl;
 }
 
+// Impresión de Lista: Recorrido directo por punteros
+void probarLista(Lista<string> &l) {
+    nodo<string> *p = l.ObtPrimero();
+    cout << "INICIO -> ";
+    while (p != NULL) {
+        cout << "[" << p->ObtInfo() << "] -> ";
+        p = p->ObtDer(); // Avanzar
+    }
+    cout << "NULL" << endl;
+}
+
 int main() {
-    // Creamos una cola de strings para los nombres de las personas
-    Cola<string> filaCine;
-    string persona;
-    int opcion;
+    Pila<string> libros;
+    Cola<string> banco;
+    Lista<string> tareas;
+    int opcion, sub;
+    string dato;
 
     do {
-        cout << "\n--- TAQUILLA DE CINE ---" << endl;
-        cout << "1. Llegada de persona a la fila" << endl;
-        cout << "2. Atender a la siguiente persona" << endl;
-        cout << "3. Ver quien es el proximo en la fila" << endl;
-        cout << "4. Ver total de personas esperando" << endl;
-        cout << "5. Imprimir cola" << endl;
-        cout << "6. Salir" << endl;
-        cout << "Opcion: ";
-        cin >> opcion;
-        
+        cout << "\n==== LABORATORIO DE ESTRUCTURAS (UCLA) ====" << endl;
+        cout << "1. Probar PILA (Libros)" << endl;
+        cout << "2. Probar COLA (Banco)" << endl;
+        cout << "3. Probar LISTA (Tareas)" << endl;
+        cout << "4. Salir" << endl;
+        cout << "Seleccion: "; cin >> opcion;
+
         if (cin.fail()) {
-            cout << "\nError: Se debe ingresar un caracter numerico. Cerrando sismta..." << endl;
-            break;
+            cin.clear();
+            cin.ignore(1000, '\n');
+            continue;
         }
 
-        switch (opcion) {
-            case 1:
-                cout << "Nombre de la persona: ";
-                cin >> persona;
-                if (filaCine.Insertar(persona))
-                    cout << persona << " se ha unido a la fila." << endl;
-                break;
-
-            case 2:
-                if (filaCine.Remover(persona))
-                    cout << "Atendiendo a: " << persona << ". Disfrute la pelicula!" << endl;
-                else
-                    cout << "No hay nadie en la fila." << endl;
-                break;
-
-            case 3:
-                if (filaCine.VerFrente(persona))
-                    cout << "El siguiente en ser atendido es: " << persona << endl;
-                else
-                    cout << "La fila esta vacia." << endl;
-                break;
-
-            case 4:
-                cout << "Personas en espera: " << filaCine.Total() << endl;
-                break;
-            case 5:
-                cout << "Imprimir cola: " << endl;
-                mostrarCola(filaCine, (string)"$"); // Usamos "$" como marca de fin
-                break;
+        if (opcion == 1) { // Lógica LIFO
+            cout << "1. Push (Añadir) | 2. Pop (Sacar) | 3. Ver Todo | 4. Total" << endl;
+            cin >> sub;
+            if (sub == 1) { cout << "Libro: "; getline(cin >> ws, dato); libros.Insertar(dato); }
+            else if (sub == 2) { if (libros.Remover(dato)) cout << "Salió: " << dato << endl; }
+            else if (sub == 3) probarPila(libros);
+            else if (sub == 4) cout << "Total: " << libros.Total() << endl;
+        } 
+        else if (opcion == 2) { // Lógica FIFO
+            cout << "1. Encolar | 2. Atender | 3. Ver Fila | 4. Total" << endl;
+            cin >> sub;
+            if (sub == 1) { cout << "Cliente: "; getline(cin >> ws, dato); banco.Insertar(dato); }
+            else if (sub == 2) { if (banco.Remover(dato)) cout << "Atendido: " << dato << endl; }
+            else if (sub == 3) probarCola(banco);
+            else if (sub == 4) cout << "Total: " << banco.Total() << endl;
         }
-    } while (opcion != 6);
+        else if (opcion == 3) { // Acceso Secuencial
+            cout << "1. Ins. Comienzo | 2. Ins. Derecho (después del 1ro) | 3. Ver Lista" << endl;
+            cin >> sub;
+            if (sub == 1) { cout << "Tarea: "; getline(cin >> ws, dato); tareas.InsComienzo(dato); }
+            else if (sub == 2) { cout << "Tarea: "; getline(cin >> ws, dato); tareas.InsDerecho(tareas.ObtPrimero(), dato); }
+            else if (sub == 3) probarLista(tareas);
+        }
+    } while (opcion != 4);
 
     return 0;
 }

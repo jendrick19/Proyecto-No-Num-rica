@@ -5,7 +5,7 @@
 template <class Tipo>
 class nodo {
     Tipo info;
-    nodo<Tipo> *der;
+    nodo<Tipo> *der; // También llamado 'prox' en algunos ejemplos
 public:
     nodo() { der = NULL; }
     void AsigInfo(Tipo v) { info = v; }
