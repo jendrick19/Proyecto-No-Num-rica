@@ -1,0 +1,7 @@
+# Binarios
+a.out
+programa_cine
+*.o
+
+# Sistema
+.DS_Store
