@@ -48,6 +48,15 @@ int Pila<Tipo>::Total() {
 }
 
 template <class Tipo>
+bool Pila<Tipo>::VerTope(Tipo &Valor) {
+    if (!Vacia()) {
+        Valor = Tope->ObtInfo();
+        return true;
+    }
+    return false;
+}
+
+template <class Tipo>
 bool Pila<Tipo>::VerFondo(Tipo &Valor) {
     if (!Vacia()) {
         nodo<Tipo> *p = Tope;

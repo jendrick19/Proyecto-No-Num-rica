@@ -1,6 +1,6 @@
 #ifndef PILA_H
 #define PILA_H
-#include "nodo.h"
+#include "../include/nodo.h"
 
 template <class Tipo>
 class Pila {

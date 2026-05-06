@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
-#include "Pila.h"
-#include "Cola.h"
-#include "Lista.h"
+#include "pila/Pila.h"
+#include "cola/Cola.h"
+#include "lista/Lista.h"
 
 using namespace std;
 

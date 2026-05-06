@@ -1,6 +1,6 @@
 #ifndef COLA_H
 #define COLA_H
-#include "nodo.h"
+#include "../include/nodo.h"
 
 template <class Tipo>
 class Cola {

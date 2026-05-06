@@ -5,3 +5,7 @@ programa_cine
 
 # Sistema
 .DS_Store
+
+# Ejecutables
+.exe
+
