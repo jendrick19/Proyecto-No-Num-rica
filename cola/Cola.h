@@ -13,8 +13,6 @@ public:
     bool Llena();
     bool Insertar(Tipo Valor);
     bool Remover(Tipo &Valor);
-    
-    // Métodos de eficiencia añadidos
     int Total(); 
     bool VerFrente(Tipo &Valor); 
 };

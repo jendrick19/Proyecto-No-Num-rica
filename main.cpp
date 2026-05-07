@@ -6,95 +6,132 @@
 
 using namespace std;
 
-// --- RUTINAS A NIVEL DE APLICACIÓN ---
-
-// Impresión de Pila: Usa una pila auxiliar para no destruir los datos
-void probarPila(Pila<string> &p) {
+void mostrarPila(Pila<string> &p) {
     Pila<string> aux;
     string valor;
-    cout << "TOP -> ";
+    cout << "TOPE -> ";
     while (p.Remover(valor)) {
-        cout << "[" << valor << "] " << endl;
+        cout << "[" << valor << "] ";
         aux.Insertar(valor);
     }
-    while (aux.Remover(valor)) p.Insertar(valor); // Restaurar
+    while (aux.Remover(valor)) {
+        p.Insertar(valor);
+    }
+    cout << endl;
 }
 
-// Impresión de Cola: Usa la técnica de la "marca"
-void probarCola(Cola<string> &c) {
-    string marca = "###";
+void mostrarCola(Cola<string> &c) {
+    if (c.Vacia()) {
+        cout << "Cola vacia." << endl;
+        return;
+    }
+
+    const string marca = "###";
     string valor;
-    bool fin = false;
-    if (c.Vacia()) return;
-    c.Insertar(marca); // Insertar marca al final
+
+    c.Insertar(marca);
     cout << "FRENTE -> ";
-    while (!fin) {
-        c.Remover(valor);
-        if (valor == marca) fin = true;
-        else {
-            cout << "[" << valor << "] -> ";
-            c.Insertar(valor); // Reinsertar
-        }
+    while (c.Remover(valor) && valor != marca) {
+        cout << "[" << valor << "] -> ";
+        c.Insertar(valor);
     }
     cout << "FINAL" << endl;
 }
 
-// Impresión de Lista: Recorrido directo por punteros
-void probarLista(Lista<string> &l) {
+void mostrarLista(Lista<string> &l) {
     nodo<string> *p = l.ObtPrimero();
     cout << "INICIO -> ";
     while (p != NULL) {
         cout << "[" << p->ObtInfo() << "] -> ";
-        p = p->ObtDer(); // Avanzar
+        p = p->ObtDer();
     }
     cout << "NULL" << endl;
 }
 
 int main() {
-    Pila<string> libros;
-    Cola<string> banco;
-    Lista<string> tareas;
-    int opcion, sub;
+    Pila<string> pila;
+    Cola<string> cola;
+    Lista<string> lista;
     string dato;
+    int opcion = 0;
 
-    do {
-        cout << "\n==== LABORATORIO DE ESTRUCTURAS (UCLA) ====" << endl;
-        cout << "1. Probar PILA (Libros)" << endl;
-        cout << "2. Probar COLA (Banco)" << endl;
-        cout << "3. Probar LISTA (Tareas)" << endl;
-        cout << "4. Salir" << endl;
-        cout << "Seleccion: "; cin >> opcion;
+    while (opcion != 4) {
+        cout << "\n1) Pila  2) Cola  3) Lista  4) Salir\nOpcion: ";
+        cin >> opcion;
 
         if (cin.fail()) {
             cin.clear();
             cin.ignore(1000, '\n');
+            cout << "Entrada invalida." << endl;
             continue;
         }
 
-        if (opcion == 1) { // Lógica LIFO
-            cout << "1. Push (Añadir) | 2. Pop (Sacar) | 3. Ver Todo | 4. Total" << endl;
-            cin >> sub;
-            if (sub == 1) { cout << "Libro: "; getline(cin >> ws, dato); libros.Insertar(dato); }
-            else if (sub == 2) { if (libros.Remover(dato)) cout << "Salió: " << dato << endl; }
-            else if (sub == 3) probarPila(libros);
-            else if (sub == 4) cout << "Total: " << libros.Total() << endl;
-        } 
-        else if (opcion == 2) { // Lógica FIFO
-            cout << "1. Encolar | 2. Atender | 3. Ver Fila | 4. Total" << endl;
-            cin >> sub;
-            if (sub == 1) { cout << "Cliente: "; getline(cin >> ws, dato); banco.Insertar(dato); }
-            else if (sub == 2) { if (banco.Remover(dato)) cout << "Atendido: " << dato << endl; }
-            else if (sub == 3) probarCola(banco);
-            else if (sub == 4) cout << "Total: " << banco.Total() << endl;
+        switch (opcion) {
+            case 1: {
+                int sub = 0;
+                cout << "1) Push  2) Pop  3) Ver  4) Total\nOpcion: ";
+                cin >> sub;
+                if (sub == 1) {
+                    cout << "Libro: ";
+                    getline(cin >> ws, dato);
+                    pila.Insertar(dato);
+                } else if (sub == 2) {
+                    if (pila.Remover(dato)) cout << "Sale: " << dato << endl;
+                    else cout << "Pila vacia." << endl;
+                } else if (sub == 3) {
+                    mostrarPila(pila);
+                } else if (sub == 4) {
+                    cout << "Total: " << pila.Total() << endl;
+                }
+                break;
+            }
+            case 2: {
+                int sub = 0;
+                cout << "1) Encolar  2) Atender  3) Ver  4) Total\nOpcion: ";
+                cin >> sub;
+                if (sub == 1) {
+                    cout << "Cliente: ";
+                    getline(cin >> ws, dato);
+                    cola.Insertar(dato);
+                } else if (sub == 2) {
+                    if (cola.Remover(dato)) cout << "Atendido: " << dato << endl;
+                    else cout << "Cola vacia." << endl;
+                } else if (sub == 3) {
+                    mostrarCola(cola);
+                } else if (sub == 4) {
+                    cout << "Total: " << cola.Total() << endl;
+                }
+                break;
+            }
+            case 3: {
+                int sub = 0;
+                cout << "1) Insertar al inicio  2) Insertar despues del primero  3) Ver\nOpcion: ";
+                cin >> sub;
+                if (sub == 1) {
+                    cout << "Tarea: ";
+                    getline(cin >> ws, dato);
+                    lista.InsComienzo(dato);
+                } else if (sub == 2) {
+                    if (lista.ObtPrimero() != NULL) {
+                        cout << "Tarea: ";
+                        getline(cin >> ws, dato);
+                        lista.InsDerecho(lista.ObtPrimero(), dato);
+                    } else {
+                        cout << "Lista vacia, usa primero la opcion 1." << endl;
+                    }
+                } else if (sub == 3) {
+                    mostrarLista(lista);
+                }
+                break;
+            }
+            case 4:
+                cout << "Hasta luego." << endl;
+                break;
+            default:
+                cout << "Opcion no valida." << endl;
+                break;
         }
-        else if (opcion == 3) { // Acceso Secuencial
-            cout << "1. Ins. Comienzo | 2. Ins. Derecho (después del 1ro) | 3. Ver Lista" << endl;
-            cin >> sub;
-            if (sub == 1) { cout << "Tarea: "; getline(cin >> ws, dato); tareas.InsComienzo(dato); }
-            else if (sub == 2) { cout << "Tarea: "; getline(cin >> ws, dato); tareas.InsDerecho(tareas.ObtPrimero(), dato); }
-            else if (sub == 3) probarLista(tareas);
-        }
-    } while (opcion != 4);
+    }
 
     return 0;
 }
