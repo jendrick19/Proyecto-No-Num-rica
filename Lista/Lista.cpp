@@ -22,11 +22,15 @@ template <class Tipo>
 bool Lista<Tipo>::InsComienzo(Tipo Valor) {
     if (!Llena()) {
         nodo<Tipo> *nuevo = new nodo<Tipo>;
+
         nuevo->AsigInfo(Valor);
-        nuevo->AsigDer(primero); // El nuevo apunta al que era el primero
-        primero = nuevo;         // Ahora el primero es el nuevo
+        nuevo->AsigDer(primero);
+       
+        primero = nuevo;   
+             
         return true;
     }
+
     return false;
 }
 
@@ -34,11 +38,15 @@ template <class Tipo>
 bool Lista<Tipo>::EliComienzo(Tipo &Valor) {
     if (!Vacia()) {
         nodo<Tipo> *viejo = primero;
+
         Valor = viejo->ObtInfo();
-        primero = primero->ObtDer(); // El primero avanza al siguiente
+        primero = primero->ObtDer();
+
         delete viejo;
+
         return true;
     }
+
     return false;
 }
 
@@ -46,11 +54,15 @@ template <class Tipo>
 bool Lista<Tipo>::InsDerecho(nodo<Tipo> *p, Tipo Valor) {
     if (!Llena() && p != NULL) {
         nodo<Tipo> *nuevo = new nodo<Tipo>;
+
         nuevo->AsigInfo(Valor);
-        nuevo->AsigDer(p->ObtDer()); // El nuevo apunta a lo que seguía de P
-        p->AsigDer(nuevo);           // P ahora apunta al nuevo
+        nuevo->AsigDer(p->ObtDer());
+
+        p->AsigDer(nuevo); 
+
         return true;
     }
+
     return false;
 }
 
@@ -58,22 +70,30 @@ template <class Tipo>
 bool Lista<Tipo>::EliDerecho(nodo<Tipo> *p, Tipo &Valor) {
     if (p != NULL && p->ObtDer() != NULL) {
         nodo<Tipo> *viejo = p->ObtDer();
+
         Valor = viejo->ObtInfo();
-        p->AsigDer(viejo->ObtDer()); // P se salta al nodo viejo para apuntar al siguiente
+
+        p->AsigDer(viejo->ObtDer());
+
         delete viejo;
+
         return true;
     }
+
     return false;
 }
 
 template <class Tipo>
 int Lista<Tipo>::Total() {
     nodo<Tipo> *p = primero;
+
     int cont = 0;
-    while (p != NULL) { // Recorrido secuencial
+
+    while (p != NULL) { 
         cont++;
         p = p->ObtDer();
     }
+
     return cont;
 }
 
