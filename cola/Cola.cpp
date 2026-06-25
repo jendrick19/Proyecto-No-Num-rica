@@ -1,3 +1,8 @@
+#ifndef COLA_CPP
+#define COLA_CPP
+
+#include "Cola.h"
+
 template <class Tipo>
 Cola<Tipo>::Cola() {
     frente = NULL;
@@ -59,7 +64,7 @@ bool Cola<Tipo>::Remover(Tipo &valor) {
 }
 
 template <class Tipo>
-int Cola<Tipo>::Total() {
+int Cola<Tipo>::Total() const {
     nodo<Tipo> *p = frente;
 
     int cont = 0;
@@ -92,3 +97,5 @@ Cola<Tipo>::~Cola() {
         
     };
 }
+
+#endif
