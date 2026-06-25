@@ -1,3 +1,8 @@
+#ifndef PILA_CPP
+#define PILA_CPP
+
+#include "Pila.h"
+
 template <class Tipo>
 Pila<Tipo>::Pila() { Tope = NULL; }
 
@@ -95,3 +100,5 @@ Pila<Tipo>::~Pila() {
     
     while (!Vacia()) Remover(aux);
 }
+
+#endif

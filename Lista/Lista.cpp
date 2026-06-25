@@ -1,3 +1,8 @@
+#ifndef LISTA_CPP
+#define LISTA_CPP
+
+#include "Lista.h"
+
 template <class Tipo>
 Lista<Tipo>::Lista() { primero = NULL; }
 
@@ -102,3 +107,5 @@ Lista<Tipo>::~Lista() {
     Tipo aux;
     while (!Vacia()) EliComienzo(aux);
 }
+
+#endif
