@@ -3,7 +3,7 @@
 
 #include <string>
 #include "Lista.h"
-#include "Taquilla.h" 
+#include "../taquilla/Taquilla.h" 
 #include "Salas.h"     
 
 class Cine {
