@@ -340,7 +340,7 @@ int main() {
   Salas cine;
   int opcion = 0;
 
-  while (opcion != 5) {
+  while (opcion != 4) {
     cout << "\n==============================================" << endl;
     cout << "      SISTEMA DE GESTION DE SALAS DE CINE" << endl;
     cout << "==============================================" << endl;
