@@ -1,7 +1,6 @@
 #include "Taquilla.h"
 
-// Inicialización de la constante en la lista de inicializadores del constructor
-Taquilla::Taquilla(string nombre, float precio) : MAX_PERSONAS(10) {
+Taquilla::Taquilla(string nombre, float precio) {
     nombreTaquilla = nombre;
     precioBoleto = (precio >= 0) ? precio : 0.0;
     abierta = true;

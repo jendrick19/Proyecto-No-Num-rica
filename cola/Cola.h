@@ -9,12 +9,12 @@ class Cola {
 public:
     Cola();
     ~Cola();
-    bool Vacia();
-    bool Llena();
+    bool Vacia() const;
+    bool Llena() const;
     bool Insertar(Tipo Valor);
     bool Remover(Tipo &Valor);
-    int Total(); 
-    bool VerFrente(Tipo &Valor); 
+    int Total() const; 
+    bool VerFrente(Tipo &Valor) const; 
 };
 
 #include "Cola.cpp"

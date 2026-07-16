@@ -14,7 +14,7 @@ private:
     float precioBoleto;
     bool abierta;
     Cola<Persona> filaClientes;
-    const int MAX_PERSONAS;
+    static const int MAX_PERSONAS = 10;
 
 public:
     // Constructor y Destructor

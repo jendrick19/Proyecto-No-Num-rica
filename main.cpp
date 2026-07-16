@@ -1,130 +1,456 @@
 #include <iostream>
+#include <limits>
+#include <sstream>
 #include <string>
-#include "pila/Pila.h"
-#include "cola/Cola.h"
-#include "lista/Lista.h"
+#include "Cine/Cine.h"
+#include "salas/Salas.h"
+#include "taquilla/Taquilla.h"
+#include "persona/Persona.h"
 
 using namespace std;
 
-void mostrarPila(Pila<string> &p) {
-    Pila<string> aux;
-    string valor;
-    cout << "TOPE -> ";
-    while (p.Remover(valor)) {
-        cout << "[" << valor << "] ";
-        aux.Insertar(valor);
-    }
-    while (aux.Remover(valor)) {
-        p.Insertar(valor);
-    }
-    cout << endl;
+void limpiarEntrada() {
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
-void mostrarCola(Cola<string> &c) {
-    if (c.Vacia()) {
-        cout << "Cola vacia." << endl;
+string leerTexto(const string &mensaje) {
+    cout << mensaje;
+    string valor;
+    getline(cin >> ws, valor);
+    return valor;
+}
+
+int leerEntero(const string &mensaje) {
+    while (true) {
+        cout << mensaje;
+        string entrada;
+        getline(cin >> ws, entrada);
+        stringstream ss(entrada);
+        int valor;
+        if (ss >> valor && ss.eof()) {
+            return valor;
+        }
+        cout << "Error: solo se aceptan numeros enteros." << endl;
+    }
+}
+
+float leerPrecio(const string &mensaje) {
+    while (true) {
+        cout << mensaje;
+        string entrada;
+        getline(cin >> ws, entrada);
+        stringstream ss(entrada);
+        float valor;
+        if (ss >> valor && ss.eof() && valor >= 0) {
+            return valor;
+        }
+        cout << "Error: el precio debe ser un numero mayor o igual a 0." << endl;
+    }
+}
+
+void mostrarColaClientes(Cola<Persona> &cola, const string &titulo) {
+    cout << titulo << endl;
+    if (cola.Vacia()) {
+        cout << "  (vacía)" << endl;
         return;
     }
 
-    const string marca = "###";
-    string valor;
-
-    c.Insertar(marca);
-    cout << "FRENTE -> ";
-    while (c.Remover(valor) && valor != marca) {
-        cout << "[" << valor << "] -> ";
-        c.Insertar(valor);
+    Cola<Persona> copia;
+    Persona persona;
+    while (cola.Remover(persona)) {
+        cout << "  - " << persona.getNombre() << " (" << persona.getCedula() << ")"
+             << " | " << persona.ObtenerEstatusActual() << endl;
+        copia.Insertar(persona);
     }
-    cout << "FINAL" << endl;
+
+    while (copia.Remover(persona)) {
+        cola.Insertar(persona);
+    }
 }
 
-void mostrarLista(Lista<string> &l) {
-    nodo<string> *p = l.ObtPrimero();
-    cout << "INICIO -> ";
+void mostrarResumen(Cine &cine, Salas &salas, Cola<Persona> &espera) {
+    cout << "\n=== RESUMEN DEL CINE ACTIVO ===" << endl;
+    cout << "Cine: " << cine.ObtNombre() << " (ID " << cine.ObtId() << ")" << endl;
+
+    cout << "Clientes en espera general: " << espera.Total() << endl;
+    mostrarColaClientes(espera, "Fila general:");
+
+    cout << "Taquillas registradas: " << cine.ObtListaTaquillas().Total() << endl;
+    Lista<Taquilla> &taquillas = cine.ObtListaTaquillas();
+    nodo<Taquilla> *pTaquilla = taquillas.ObtPrimero();
+    int idx = 1;
+    while (pTaquilla != NULL) {
+        Taquilla &t = pTaquilla->ObtInfo();
+        cout << " - " << idx << ") " << t.getNombreTaquilla()
+             << " | Precio: $" << t.getPrecioBoleto()
+             << " | En espera: " << t.cantidadClientesEnEspera() << endl;
+        if (t.cantidadClientesEnEspera() > 0) {
+            mostrarColaClientes(t.getColaTaquilla(), "   Fila de " + t.getNombreTaquilla() + ":");
+        }
+        pTaquilla = pTaquilla->ObtDer();
+        ++idx;
+    }
+
+    cout << "Salas registradas: " << salas.TotalSalas() << endl;
+    salas.Mostrar();
+}
+
+Taquilla* obtenerTaquillaPorIndice(Cine &cine, int indice) {
+    Lista<Taquilla> &taquillas = cine.ObtListaTaquillas();
+    nodo<Taquilla> *p = taquillas.ObtPrimero();
+    int actual = 0;
     while (p != NULL) {
-        cout << "[" << p->ObtInfo() << "] -> ";
+        if (actual == indice) {
+            return &p->ObtInfo();
+        }
+        p = p->ObtDer();
+        ++actual;
+    }
+    return NULL;
+}
+
+void renumerarTaquillas(Cine &cine) {
+    Lista<Taquilla> &taquillas = cine.ObtListaTaquillas();
+    nodo<Taquilla> *p = taquillas.ObtPrimero();
+    int numero = 1;
+    while (p != NULL) {
+        p->ObtInfo().setNombreTaquilla("Taquilla " + to_string(numero));
+        p = p->ObtDer();
+        ++numero;
+    }
+}
+
+bool eliminarTaquilla(Cine &cine, int indice) {
+    Lista<Taquilla> &taquillas = cine.ObtListaTaquillas();
+    if (indice < 0 || indice >= taquillas.Total()) {
+        return false;
+    }
+
+    if (indice == 0) {
+        Taquilla aux;
+        if (taquillas.EliComienzo(aux)) {
+            renumerarTaquillas(cine);
+            return true;
+        }
+        return false;
+    }
+
+    nodo<Taquilla> *anterior = NULL;
+    nodo<Taquilla> *actual = taquillas.ObtPrimero();
+    int actualIndex = 0;
+    while (actual != NULL) {
+        if (actualIndex == indice) {
+            if (anterior != NULL) {
+                anterior->AsigDer(actual->ObtDer());
+                delete actual;
+                renumerarTaquillas(cine);
+                return true;
+            }
+        }
+        anterior = actual;
+        actual = actual->ObtDer();
+        ++actualIndex;
+    }
+    return false;
+}
+
+bool validarCliente(Cine &cine, Salas &salas, const string &pelicula, int salaNumero, string &mensajeError) {
+    if (cine.ObtId() <= 0) {
+        mensajeError = "Error: no existe un cine configurado.";
+        return false;
+    }
+
+    string peliculaActual;
+    if (!salas.ObtenerPelicula(salaNumero, peliculaActual)) {
+        mensajeError = "Error: la sala ingresada no existe.";
+        return false;
+    }
+
+    if (peliculaActual != pelicula) {
+        mensajeError = "Error: la pelicula ingresada no coincide con la pelicula de la sala " + to_string(salaNumero) + ".";
+        return false;
+    }
+
+    if (cine.ObtListaTaquillas().Total() == 0) {
+        mensajeError = "Error: no hay taquillas configuradas para este cine.";
+        return false;
+    }
+
+    mensajeError = "";
+    return true;
+}
+
+int elegirTaquillaMasVacia(Cine &cine) {
+    Lista<Taquilla> &taquillas = cine.ObtListaTaquillas();
+    nodo<Taquilla> *p = taquillas.ObtPrimero();
+    int mejor = -1;
+    int menor = 999999;
+    int idx = 0;
+    while (p != NULL) {
+        int ocupadas = p->ObtInfo().cantidadClientesEnEspera();
+        if (ocupadas < menor) {
+            menor = ocupadas;
+            mejor = idx;
+        }
+        p = p->ObtDer();
+        ++idx;
+    }
+    return mejor;
+}
+
+void repartirEspera(Cine &cine, Salas &salas, Cola<Persona> &espera) {
+    while (!espera.Vacia()) {
+        int idx = elegirTaquillaMasVacia(cine);
+        if (idx < 0) {
+            break;
+        }
+        Taquilla *taquilla = obtenerTaquillaPorIndice(cine, idx);
+        if (taquilla == NULL) {
+            break;
+        }
+        Persona cliente;
+        if (!espera.Remover(cliente)) {
+            break;
+        }
+        if (!taquilla->recibirCliente(cliente)) {
+            espera.Insertar(cliente);
+            break;
+        }
+    }
+}
+
+bool atenderCliente(Cine &cine, Salas &salas, Cola<Persona> &espera) {
+    Lista<Taquilla> &taquillas = cine.ObtListaTaquillas();
+    nodo<Taquilla> *p = taquillas.ObtPrimero();
+    while (p != NULL) {
+        Taquilla &taquilla = p->ObtInfo();
+        if (!taquilla.getColaTaquilla().Vacia()) {
+            Persona cliente;
+            if (taquilla.atenderSiguienteCliente(cliente)) {
+                if (cliente.getSala() > 0) {
+                    if (!salas.EncolarCliente(cliente.getSala(), cliente)) {
+                        cout << "Error: no fue posible enviar el cliente a la sala solicitada." << endl;
+                        return false;
+                    }
+                }
+                repartirEspera(cine, salas, espera);
+                cout << "Cliente atendido y enviado a la sala solicitada." << endl;
+                return true;
+            }
+        }
         p = p->ObtDer();
     }
-    cout << "NULL" << endl;
+    cout << "No hay clientes pendientes en taquillas." << endl;
+    return false;
 }
 
 int main() {
-    Pila<string> pila;
-    Cola<string> cola;
-    Lista<string> lista;
-    string dato;
+    Cine cines[3];
+    Salas salas[3];
+    Cola<Persona> esperas[3];
+    int numCines = 0;
+    int cineActivo = -1;
     int opcion = 0;
 
-    while (opcion != 4) {
-        cout << "\n1) Pila  2) Cola  3) Lista  4) Salir\nOpcion: ";
-        cin >> opcion;
-
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "Entrada invalida." << endl;
-            continue;
-        }
+    while (opcion != 8) {
+        cout << "\n=== MENU INTEGRADO ===" << endl;
+        cout << "1) Gestionar cines" << endl;
+        cout << "2) Gestionar taquillas" << endl;
+        cout << "3) Gestionar salas" << endl;
+        cout << "4) Registrar cliente" << endl;
+        cout << "5) Atender cliente" << endl;
+        cout << "6) Ver resumen" << endl;
+        cout << "7) Ver cines registrados" << endl;
+        cout << "8) Salir" << endl;
+        opcion = leerEntero("Opcion: ");
 
         switch (opcion) {
             case 1: {
                 int sub = 0;
-                cout << "1) Push  2) Pop  3) Ver  4) Total\nOpcion: ";
-                cin >> sub;
+                cout << "\n--- CINES ---" << endl;
+                cout << "1) Crear cine" << endl;
+                cout << "2) Seleccionar cine activo" << endl;
+                cout << "3) Modificar cine activo" << endl;
+                cout << "4) Volver" << endl;
+                sub = leerEntero("Opcion: ");
+
                 if (sub == 1) {
-                    cout << "Libro: ";
-                    getline(cin >> ws, dato);
-                    pila.Insertar(dato);
+                    if (numCines >= 3) {
+                        cout << "Error: maximo 3 cines." << endl;
+                    } else {
+                        int id = leerEntero("ID del cine: ");
+                        string nombre = leerTexto("Nombre del cine: ");
+                        bool existe = false;
+                        for (int i = 0; i < numCines; ++i) {
+                            if (cines[i].ObtId() == id) {
+                                existe = true;
+                                break;
+                            }
+                        }
+                        if (existe) {
+                            cout << "Error: ya existe un cine con ese ID." << endl;
+                        } else {
+                            cines[numCines].AsigId(id);
+                            cines[numCines].AsigNombre(nombre);
+                            ++numCines;
+                            cineActivo = numCines - 1;
+                            cout << "Cine creado correctamente." << endl;
+                        }
+                    }
                 } else if (sub == 2) {
-                    if (pila.Remover(dato)) cout << "Sale: " << dato << endl;
-                    else cout << "Pila vacia." << endl;
+                    if (numCines == 0) {
+                        cout << "No hay cines registrados." << endl;
+                    } else {
+                        cout << "\nCines disponibles:" << endl;
+                        for (int i = 0; i < numCines; ++i) {
+                            cout << (i + 1) << ") " << cines[i].ObtNombre() << " (ID " << cines[i].ObtId() << ")" << endl;
+                        }
+                        int idx = leerEntero("Numero del cine a activar: ");
+                        if (idx < 1 || idx > numCines) {
+                            cout << "Error: numero de cine invalido." << endl;
+                        } else {
+                            cineActivo = idx - 1;
+                            cout << "Cine activo: " << cines[cineActivo].ObtNombre() << endl;
+                        }
+                    }
                 } else if (sub == 3) {
-                    mostrarPila(pila);
-                } else if (sub == 4) {
-                    cout << "Total: " << pila.Total() << endl;
+                    if (cineActivo < 0 || cineActivo >= numCines) {
+                        cout << "Error: no hay un cine activo." << endl;
+                    } else {
+                        int id = leerEntero("Nuevo ID del cine: ");
+                        string nombre = leerTexto("Nuevo nombre del cine: ");
+                        cines[cineActivo].AsigId(id);
+                        cines[cineActivo].AsigNombre(nombre);
+                        cout << "Cine modificado correctamente." << endl;
+                    }
                 }
                 break;
             }
             case 2: {
+                if (cineActivo < 0 || cineActivo >= numCines) {
+                    cout << "Error: debe crear o seleccionar un cine antes de gestionar taquillas." << endl;
+                    break;
+                }
                 int sub = 0;
-                cout << "1) Encolar  2) Atender  3) Ver  4) Total\nOpcion: ";
-                cin >> sub;
+                cout << "\n--- TAQUILLAS ---" << endl;
+                cout << "1) Agregar taquilla" << endl;
+                cout << "2) Modificar precio" << endl;
+                cout << "3) Eliminar taquilla" << endl;
+                cout << "4) Ver taquillas" << endl;
+                cout << "5) Volver" << endl;
+                sub = leerEntero("Opcion: ");
                 if (sub == 1) {
-                    cout << "Cliente: ";
-                    getline(cin >> ws, dato);
-                    cola.Insertar(dato);
+                    if (cines[cineActivo].ObtListaTaquillas().Total() >= 3) {
+                        cout << "Error: maximo 3 taquillas por cine." << endl;
+                    } else {
+                        int numero = cines[cineActivo].ObtListaTaquillas().Total() + 1;
+                        string nombre = "Taquilla " + to_string(numero);
+                        float precio = leerPrecio("Precio del boleto: ");
+                        Taquilla taquilla(nombre, precio);
+                        if (cines[cineActivo].AgregarTaquilla(taquilla)) {
+                            cout << "Taquilla agregada correctamente." << endl;
+                        } else {
+                            cout << "No se pudo agregar la taquilla." << endl;
+                        }
+                    }
                 } else if (sub == 2) {
-                    if (cola.Remover(dato)) cout << "Atendido: " << dato << endl;
-                    else cout << "Cola vacia." << endl;
+                    mostrarResumen(cines[cineActivo], salas[cineActivo], esperas[cineActivo]);
+                    int index = leerEntero("Numero de taquilla a modificar: ");
+                    Taquilla *taquilla = obtenerTaquillaPorIndice(cines[cineActivo], index - 1);
+                    if (taquilla == NULL) {
+                        cout << "Error: taquilla invalida." << endl;
+                    } else {
+                        float precio = leerPrecio("Nuevo precio: ");
+                        taquilla->setPrecioBoleto(precio);
+                        cout << "Precio actualizado." << endl;
+                    }
                 } else if (sub == 3) {
-                    mostrarCola(cola);
+                    mostrarResumen(cines[cineActivo], salas[cineActivo], esperas[cineActivo]);
+                    int index = leerEntero("Numero de taquilla a eliminar: ");
+                    if (eliminarTaquilla(cines[cineActivo], index - 1)) {
+                        cout << "Taquilla eliminada." << endl;
+                    } else {
+                        cout << "Error: no se pudo eliminar la taquilla." << endl;
+                    }
                 } else if (sub == 4) {
-                    cout << "Total: " << cola.Total() << endl;
+                    mostrarResumen(cines[cineActivo], salas[cineActivo], esperas[cineActivo]);
                 }
                 break;
             }
             case 3: {
+                if (cineActivo < 0 || cineActivo >= numCines) {
+                    cout << "Error: debe crear o seleccionar un cine antes de gestionar salas." << endl;
+                    break;
+                }
                 int sub = 0;
-                cout << "1) Insertar al inicio  2) Insertar despues del primero  3) Ver\nOpcion: ";
-                cin >> sub;
+                cout << "\n--- SALAS ---" << endl;
+                cout << "1) Agregar sala" << endl;
+                cout << "2) Ver salas" << endl;
+                cout << "3) Volver" << endl;
+                sub = leerEntero("Opcion: ");
                 if (sub == 1) {
-                    cout << "Tarea: ";
-                    getline(cin >> ws, dato);
-                    lista.InsComienzo(dato);
-                } else if (sub == 2) {
-                    if (lista.ObtPrimero() != NULL) {
-                        cout << "Tarea: ";
-                        getline(cin >> ws, dato);
-                        lista.InsDerecho(lista.ObtPrimero(), dato);
+                    int nSala = leerEntero("Numero de sala: ");
+                    string pelicula = leerTexto("Pelicula: ");
+                    if (salas[cineActivo].AgregarSala(nSala, pelicula)) {
+                        cout << "Sala agregada correctamente." << endl;
                     } else {
-                        cout << "Lista vacia, usa primero la opcion 1." << endl;
+                        cout << "No se pudo agregar la sala." << endl;
                     }
-                } else if (sub == 3) {
-                    mostrarLista(lista);
+                } else if (sub == 2) {
+                    salas[cineActivo].Mostrar();
                 }
                 break;
             }
-            case 4:
+            case 4: {
+                if (cineActivo < 0 || cineActivo >= numCines) {
+                    cout << "Error: no existe un cine activo para registrar clientes." << endl;
+                    break;
+                }
+                string cedula = leerTexto("Cedula: ");
+                string nombre = leerTexto("Nombre: ");
+                int salaNumero = leerEntero("Numero de sala: ");
+                string pelicula = leerTexto("Pelicula: ");
+
+                string mensajeError;
+                if (!validarCliente(cines[cineActivo], salas[cineActivo], pelicula, salaNumero, mensajeError)) {
+                    cout << mensajeError << endl;
+                    break;
+                }
+
+                Persona cliente(cedula, nombre, pelicula, salaNumero);
+                cliente.registrarEstatus("En espera");
+                esperas[cineActivo].Insertar(cliente);
+                repartirEspera(cines[cineActivo], salas[cineActivo], esperas[cineActivo]);
+                cout << "Cliente registrado correctamente y enviado a la taquilla disponible." << endl;
+                break;
+            }
+            case 5: {
+                if (cineActivo < 0 || cineActivo >= numCines) {
+                    cout << "Error: debe crear o seleccionar un cine antes de atender clientes." << endl;
+                    break;
+                }
+                atenderCliente(cines[cineActivo], salas[cineActivo], esperas[cineActivo]);
+                break;
+            }
+            case 6:
+                if (cineActivo < 0 || cineActivo >= numCines) {
+                    cout << "No hay un cine activo para mostrar." << endl;
+                } else {
+                    mostrarResumen(cines[cineActivo], salas[cineActivo], esperas[cineActivo]);
+                }
+                break;
+            case 7:
+                if (numCines == 0) {
+                    cout << "No hay cines registrados." << endl;
+                } else {
+                    cout << "\nCines registrados:" << endl;
+                    for (int i = 0; i < numCines; ++i) {
+                        cout << (i + 1) << ") " << cines[i].ObtNombre() << " (ID " << cines[i].ObtId() << ")" << endl;
+                    }
+                }
+                break;
+            case 8:
                 cout << "Hasta luego." << endl;
                 break;
             default:

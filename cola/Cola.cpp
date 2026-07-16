@@ -5,12 +5,12 @@ Cola<Tipo>::Cola() {
 }
 
 template <class Tipo>
-bool Cola<Tipo>::Vacia() {
+bool Cola<Tipo>::Vacia() const {
     return frente == NULL;
 }
 
 template <class Tipo>
-bool Cola<Tipo>::Llena() {
+bool Cola<Tipo>::Llena() const {
     nodo<Tipo> *p = new nodo<Tipo>;
 
     if (p == NULL) return true;
@@ -59,7 +59,7 @@ bool Cola<Tipo>::Remover(Tipo &valor) {
 }
 
 template <class Tipo>
-int Cola<Tipo>::Total() {
+int Cola<Tipo>::Total() const {
     nodo<Tipo> *p = frente;
 
     int cont = 0;
@@ -73,7 +73,7 @@ int Cola<Tipo>::Total() {
 }
 
 template <class Tipo>
-bool Cola<Tipo>::VerFrente(Tipo &valor) {
+bool Cola<Tipo>::VerFrente(Tipo &valor) const {
     if (!Vacia()) {
         valor = frente->ObtInfo();
         return true;

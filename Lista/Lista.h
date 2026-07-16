@@ -11,8 +11,8 @@ public:
     ~Lista();
     nodo<Tipo>* ObtPrimero();
     void AsigPrimero(nodo<Tipo> *p);
-    bool Vacia();
-    bool Llena();
+    bool Vacia() const;
+    bool Llena() const;
     
 
     bool InsComienzo(Tipo Valor);
@@ -21,7 +21,7 @@ public:
     bool EliDerecho(nodo<Tipo> *p, Tipo &Valor);
     
  
-    int Total();
+    int Total() const;
 };
 
 #include "Lista.cpp"

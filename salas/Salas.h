@@ -5,9 +5,6 @@
 #include <string>
 #include "../Lista/Lista.h"
 #include "../cola/Cola.h"
-
-// Requerido para compilar. Lo implementa otro integrante.
-// Ver salas/INTEGRACION.md si aun no existe el modulo.
 #include "../persona/Persona.h"
 
 struct Sala {
@@ -51,5 +48,4 @@ public:
     void Mostrar();
 };
 
-#include "Salas.cpp"
 #endif

@@ -2,9 +2,9 @@
 #define CINE_H
 
 #include <string>
-#include "Lista.h"
-#include "Taquilla.h" 
-#include "Salas.h"     
+#include "../Lista/Lista.h"
+#include "../taquilla/Taquilla.h"
+#include "../salas/Salas.h"
 
 class Cine {
 private:
@@ -36,5 +36,4 @@ public:
     Lista<Sala>& ObtListaSalas();
 };
 
-#include "Cine.cpp"
 #endif
