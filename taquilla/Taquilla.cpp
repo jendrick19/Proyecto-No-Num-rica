@@ -1,9 +1,10 @@
 #include "Taquilla.h"
 
-Taquilla::Taquilla(string nombre, float precio) {
+Taquilla::Taquilla(string nombre, float precio, int limite) {
     nombreTaquilla = nombre;
     precioBoleto = (precio >= 0) ? precio : 0.0;
     abierta = true;
+    limitePersonas = (limite >= 1) ? limite : 10;
 }
 
 Taquilla::~Taquilla() {
@@ -20,6 +21,10 @@ void Taquilla::setPrecioBoleto(float precio) {
 bool Taquilla::estaAbierta() const { return abierta; }
 void Taquilla::setAbierta(bool estado) { abierta = estado; }
 int Taquilla::cantidadClientesEnEspera() const { return filaClientes.Total(); }
+int Taquilla::getLimitePersonas() const { return limitePersonas; }
+void Taquilla::setLimitePersonas(int limite) { 
+    if (limite >= 1) limitePersonas = limite; 
+}
 
 Cola<Persona>& Taquilla::getColaTaquilla() { return filaClientes; }
 
@@ -30,8 +35,8 @@ bool Taquilla::recibirCliente(Persona p) {
         return false;
     }
     
-    if (filaClientes.Total() >= MAX_PERSONAS) {
-        cout << nombreTaquilla << " tiene la fila llena (max. " << MAX_PERSONAS << " personas)." << endl;
+    if (filaClientes.Total() >= limitePersonas) {
+        cout << nombreTaquilla << " tiene la fila llena (max. " << limitePersonas << " personas)." << endl;
         return false;
     }
     

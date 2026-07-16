@@ -5,6 +5,33 @@ Cola<Tipo>::Cola() {
 }
 
 template <class Tipo>
+Cola<Tipo>::Cola(const Cola<Tipo> &otra) {
+    frente = NULL;
+    final = NULL;
+    nodo<Tipo> *p = otra.frente;
+    while (p != NULL) {
+        Insertar(p->ObtInfo());
+        p = p->ObtSig();
+    }
+}
+
+template <class Tipo>
+Cola<Tipo> &Cola<Tipo>::operator=(const Cola<Tipo> &otra) {
+    if (this != &otra) {
+        Tipo aux;
+        while (!Vacia()) {
+            Remover(aux);
+        }
+        nodo<Tipo> *p = otra.frente;
+        while (p != NULL) {
+            Insertar(p->ObtInfo());
+            p = p->ObtSig();
+        }
+    }
+    return *this;
+}
+
+template <class Tipo>
 bool Cola<Tipo>::Vacia() const {
     return frente == NULL;
 }

@@ -3,11 +3,13 @@
 Cine::Cine() {
     idCine = 0;
     nombreCine = "Sin Nombre";
+    precioDelDia = -1.0;
 }
 
 Cine::Cine(int id, std::string nombre) {
     idCine = id;
     nombreCine = nombre;
+    precioDelDia = -1.0;
 }
 
 Cine::~Cine() {
@@ -27,6 +29,14 @@ int Cine::ObtId() {
 
 void Cine::AsigId(int id) {
     idCine = id;
+}
+
+float Cine::ObtPrecioDelDia() {
+    return precioDelDia;
+}
+
+void Cine::AsigPrecioDelDia(float precio) {
+    precioDelDia = (precio >= 0.0) ? precio : 0.0;
 }
 
 bool Cine::AgregarTaquilla(Taquilla nuevaTaquilla) {

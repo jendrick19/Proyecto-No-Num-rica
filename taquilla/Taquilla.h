@@ -14,11 +14,11 @@ private:
     float precioBoleto;
     bool abierta;
     Cola<Persona> filaClientes;
-    static const int MAX_PERSONAS = 10;
+    int limitePersonas;
 
 public:
     // Constructor y Destructor
-    Taquilla(string nombre = "Sin Nombre", float precio = 0.0);
+    Taquilla(string nombre = "Sin Nombre", float precio = 0.0, int limite = 10);
     ~Taquilla();
 
     // Getters y Setters (Con const solo en retornos primitivos seguros)
@@ -29,6 +29,8 @@ public:
     bool estaAbierta() const;
     void setAbierta(bool estado);
     int cantidadClientesEnEspera() const;
+    int getLimitePersonas() const;
+    void setLimitePersonas(int limite);
     
     // Retorna la referencia real de la cola
     Cola<Persona>& getColaTaquilla();

@@ -10,6 +10,7 @@ class Cine {
 private:
     std::string nombreCine;
     int idCine;
+    float precioDelDia;
     
     Lista<Taquilla> listaTaquillas;
     Lista<Sala> listaSalas;
@@ -25,6 +26,9 @@ public:
     
     int ObtId();
     void AsigId(int id);
+
+    float ObtPrecioDelDia();
+    void AsigPrecioDelDia(float precio);
 
     // Métodos para gestionar las estructuras internas
     // Se valida el límite máximo de 3 Taquillas por Cine

@@ -8,6 +8,8 @@ class Cola {
 
 public:
     Cola();
+    Cola(const Cola<Tipo> &otra);
+    Cola<Tipo> &operator=(const Cola<Tipo> &otra);
     ~Cola();
     bool Vacia() const;
     bool Llena() const;
