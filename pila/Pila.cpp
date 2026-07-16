@@ -2,10 +2,10 @@ template <class Tipo>
 Pila<Tipo>::Pila() { Tope = NULL; }
 
 template <class Tipo>
-bool Pila<Tipo>::Vacia() { return Tope == NULL; }
+bool Pila<Tipo>::Vacia() const { return Tope == NULL; }
 
 template <class Tipo>
-bool Pila<Tipo>::Llena() {
+bool Pila<Tipo>::Llena() const {
     nodo<Tipo> *p = new nodo<Tipo>;
 
     if (p == NULL) return true;
@@ -48,7 +48,7 @@ bool Pila<Tipo>::Remover(Tipo &Valor) {
 }
 
 template <class Tipo>
-int Pila<Tipo>::Total() {
+int Pila<Tipo>::Total() const {
     nodo<Tipo> *p = Tope;
 
     int cont = 0;
@@ -62,7 +62,7 @@ int Pila<Tipo>::Total() {
 }
 
 template <class Tipo>
-bool Pila<Tipo>::VerTope(Tipo &Valor) {
+bool Pila<Tipo>::VerTope(Tipo &Valor) const {
     if (!Vacia()) {
 
         Valor = Tope->ObtInfo();
@@ -74,7 +74,7 @@ bool Pila<Tipo>::VerTope(Tipo &Valor) {
 }
 
 template <class Tipo>
-bool Pila<Tipo>::VerFondo(Tipo &Valor) {
+bool Pila<Tipo>::VerFondo(Tipo &Valor) const {
     if (!Vacia()) {
         nodo<Tipo> *p = Tope;
 

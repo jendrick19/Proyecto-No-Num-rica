@@ -2,14 +2,15 @@
 #define CINE_H
 
 #include <string>
-#include "Lista.h"
-#include "Taquilla.h" 
-#include "Salas.h"     
+#include "../Lista/Lista.h"
+#include "../taquilla/Taquilla.h"
+#include "../salas/Salas.h"
 
 class Cine {
 private:
     std::string nombreCine;
     int idCine;
+    float precioDelDia;
     
     Lista<Taquilla> listaTaquillas;
     Lista<Sala> listaSalas;
@@ -26,6 +27,9 @@ public:
     int ObtId();
     void AsigId(int id);
 
+    float ObtPrecioDelDia();
+    void AsigPrecioDelDia(float precio);
+
     // Métodos para gestionar las estructuras internas
     // Se valida el límite máximo de 3 Taquillas por Cine
     bool AgregarTaquilla(Taquilla nuevaTaquilla);
@@ -36,5 +40,4 @@ public:
     Lista<Sala>& ObtListaSalas();
 };
 
-#include "Cine.cpp"
 #endif

@@ -8,10 +8,10 @@ template <class Tipo>
 void Lista<Tipo>::AsigPrimero(nodo<Tipo> *p) { primero = p; }
 
 template <class Tipo>
-bool Lista<Tipo>::Vacia() { return primero == NULL; }
+bool Lista<Tipo>::Vacia() const { return primero == NULL; }
 
 template <class Tipo>
-bool Lista<Tipo>::Llena() {
+bool Lista<Tipo>::Llena() const {
     nodo<Tipo> *p = new nodo<Tipo>;
     if (p == NULL) return true;
     delete p;
@@ -84,7 +84,7 @@ bool Lista<Tipo>::EliDerecho(nodo<Tipo> *p, Tipo &Valor) {
 }
 
 template <class Tipo>
-int Lista<Tipo>::Total() {
+int Lista<Tipo>::Total() const {
     nodo<Tipo> *p = primero;
 
     int cont = 0;

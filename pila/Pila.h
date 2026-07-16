@@ -9,14 +9,14 @@ class Pila {
 public:
     Pila();
     ~Pila();
-    bool Vacia();
-    bool Llena();
+    bool Vacia() const;
+    bool Llena() const;
     bool Insertar(Tipo Valor); 
     bool Remover(Tipo &Valor); 
     
-    int Total();               
-    bool VerTope(Tipo &Valor); 
-    bool VerFondo(Tipo &Valor);
+    int Total() const;               
+    bool VerTope(Tipo &Valor) const; 
+    bool VerFondo(Tipo &Valor) const;
 };
 
 #include "Pila.cpp"
