@@ -40,7 +40,7 @@ bool Taquilla::recibirCliente(Persona p) {
         return false;
     }
     
-    p.registrarEstatus("1: En cola de " + nombreTaquilla);
+    p.registrarEstatus("Haciendo fila en " + nombreTaquilla);
     return filaClientes.Insertar(p);
 }
 
@@ -51,7 +51,7 @@ bool Taquilla::atenderSiguienteCliente(Persona &pAtendida) {
     }
     
     if (filaClientes.Remover(pAtendida)) {
-        pAtendida.registrarEstatus("2: Atendido en " + nombreTaquilla + ". Boleto emitido.");
+        pAtendida.registrarEstatus("Atendido en " + nombreTaquilla + ". Boleto emitido.");
         return true;
     }
     

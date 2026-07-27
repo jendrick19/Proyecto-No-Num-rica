@@ -93,6 +93,25 @@ bool Salas::ObtenerPelicula(int nSala, std::string &pelicula) {
     return true;
 }
 
+bool Salas::ObtenerSalaPorIndice(int indice, int &nSala, std::string &pelicula) {
+    if (indice < 0) return false;
+
+    nodo<Sala> *p = listaSalas.ObtPrimero();
+    int actual = 0;
+
+    while (p != NULL) {
+        if (actual == indice) {
+            nSala = p->ObtInfo().nSala;
+            pelicula = p->ObtInfo().pelicula;
+            return true;
+        }
+        p = p->ObtDer();
+        ++actual;
+    }
+
+    return false;
+}
+
 bool Salas::EncolarCliente(int nSala, const Persona &cliente) {
     nodo<Sala> *p = buscarNodo(nSala);
     if (p == NULL) return false;
@@ -146,5 +165,43 @@ void Salas::Mostrar() {
                   << " | Clientes en cola: " << sala.colaSala.Total()
                   << std::endl;
         p = p->ObtDer();
+    }
+}
+
+void Salas::ProcesarTodasLasSalas() {
+    nodo<Sala> *p = listaSalas.ObtPrimero();
+
+    if (p == NULL) {
+        std::cout << "No hay salas registradas." << std::endl;
+        return;
+    }
+
+    bool huboClientes = false;
+    while (p != NULL) {
+        Sala &sala = p->ObtInfo();
+        if (!sala.colaSala.Vacia()) {
+            huboClientes = true;
+            std::cout << "\nReproduciendo pelicula en Sala " << sala.nSala << ": \"" << sala.pelicula << "\"" << std::endl;
+            std::cout << "---------------------------------------------------" << std::endl;
+            Persona cliente;
+            while (sala.colaSala.Remover(cliente)) {
+                // TRANSICIÓN 2: Entra a ver la película
+                cliente.registrarEstatus("Viendo Pelicula: " + sala.pelicula);
+                std::cout << "[TRANSICION] Estatus actualizado: " << cliente.ObtenerEstatusActual() << std::endl;
+
+                // TRANSICIÓN 3: Finaliza el proceso y sale
+                cliente.registrarEstatus("Proceso Finalizado (Salio del Cine)");
+                std::cout << "[SALIDA] " << cliente.getNombre() << " termino la pelicula y abandona el cine." << std::endl;
+                std::cout << "[TRANSICION] Estatus final: " << cliente.ObtenerEstatusActual() << std::endl;
+                std::cout << "---------------------------------------------------" << std::endl;
+            }
+        }
+        p = p->ObtDer();
+    }
+
+    if (huboClientes) {
+        std::cout << "\nPelicula reproducida y terminada." << std::endl;
+    } else {
+        std::cout << "\nNo hay clientes esperando en ninguna sala." << std::endl;
     }
 }
