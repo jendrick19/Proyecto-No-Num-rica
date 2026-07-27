@@ -272,10 +272,11 @@ bool registrarCliente(Sede &sede) {
         return false;
     }
 
-    string cedula = leerTexto("Cedula del cliente: ");
-    string nombre = leerTexto("Nombre del cliente: ");
+    // 1. Mostrar y seleccionar Taquilla
+    mostrarTaquillas(sede.cine);
+    int seleccion = leerEntero("En que taquilla se pone (0 = la que tenga menos gente): ");
 
-    // El cliente pide una PELICULA, no una sala.
+    // 2. Mostrar y seleccionar Pelicula
     mostrarCartelera(sede.salas);
     int opcionPelicula = leerEntero("Que pelicula quiere ver: ");
 
@@ -286,12 +287,14 @@ bool registrarCliente(Sede &sede) {
         return false;
     }
 
-    // Sala 0 = todavia no sabe a que sala va; eso se lo diran en la taquilla.
+    // 3. Solicitar datos personales
+    cout << endl;
+    string cedula = leerTexto("Cedula del cliente: ");
+    string nombre = leerTexto("Nombre del cliente: ");
+
+    // 4. Crear cliente y registrar estatus
     Persona cliente(cedula, nombre, pelicula, 0);
     cliente.registrarEstatus("Llego al cine a ver: " + pelicula);
-
-    mostrarTaquillas(sede.cine);
-    int seleccion = leerEntero("En que taquilla se pone (0 = la que tenga menos gente): ");
 
     int indice = (seleccion == 0) ? elegirTaquillaConCupo(sede.cine) : seleccion - 1;
     Taquilla *taquilla = obtenerTaquillaPorIndice(sede.cine, indice);
@@ -304,12 +307,11 @@ bool registrarCliente(Sede &sede) {
         return true;
     }
 
-    // Todas llenas (o eligio una llena): espera en el lobby hasta que se libere
-    // cupo. repartirEsperaGeneral lo movera solo.
+    // Todas llenas (o eligio una llena/invalida/cerrada): espera en el lobby (esperaGeneral)
     cliente.registrarEstatus("Esperando en el lobby (taquillas llenas)");
     sede.esperaGeneral.Insertar(cliente);
     cout << "\n[LLEGADA] " << nombre << " no consiguio cupo en taquilla y quedo "
-         << "en la fila general del cine." << endl;
+         << "en la fila general del cine (Lobby)." << endl;
     return true;
 }
 
@@ -405,17 +407,45 @@ bool ingresarUnCliente(Sede &sede, int nSala) {
 // =====================================================================
 
 bool salirUnCliente(Sede &sede) {
-    Persona cliente;
-    if (!sede.enFuncion.Remover(cliente)) {
+    if (sede.enFuncion.Vacia()) {
         return false; // no hay nadie en funcion
     }
 
-    cliente.registrarEstatus("Termino la funcion y salio del cine");
+    Persona cliente;
+    while (sede.enFuncion.Remover(cliente)) {
+        cliente.registrarEstatus("Termino la funcion y salio del cine");
 
-    cout << "[SALIDA] " << cliente.getNombre() << " termino "
-         << cliente.getPelicula() << " y abandona el cine." << endl;
-    cliente.mostrarHistorialEstatus();
+        cout << "[SALIDA] " << cliente.getNombre() << " termino "
+             << cliente.getPelicula() << " y abandona el cine." << endl;
+        cliente.mostrarHistorialEstatus();
+        cout << "---------------------------------------------------" << endl;
+    }
+    return true;
+}
+
+bool iniciarFuncionSala(Sede &sede, int nSala) {
+    Cola<Persona> *colaSala = NULL;
+    if (!sede.salas.ObtenerCola(nSala, colaSala) || colaSala == NULL || colaSala->Vacia()) {
+        return false;
+    }
+
+    string pelicula;
+    sede.salas.ObtenerPelicula(nSala, pelicula);
+
+    cout << "\n[SALA " << nSala << "] Iniciando funcion de \"" << pelicula << "\"..." << endl;
     cout << "---------------------------------------------------" << endl;
+
+    Persona cliente;
+    int cont = 0;
+    while (colaSala->Remover(cliente)) {
+        cliente.registrarEstatus("Viendo " + pelicula + " en la Sala " + to_string(nSala));
+        sede.enFuncion.Insertar(cliente);
+        cout << "[SALA " << nSala << "] " << cliente.getNombre()
+             << " entro a ver " << pelicula << "." << endl;
+        cont++;
+    }
+    cout << "---------------------------------------------------" << endl;
+    cout << "Se ingresaron " << cont << " clientes a la funcion." << endl;
     return true;
 }
 
@@ -423,19 +453,10 @@ bool salirUnCliente(Sede &sede) {
 //  AVANCE DE UN SOLO PASO (usado por la version paso a paso)
 // =====================================================================
 
-// Se atiende primero la etapa mas avanzada para que cada cliente complete su
-// recorrido antes de que empiece el siguiente.
+// Mueve un unico cliente por la etapa mas avanzada que tenga trabajo pendiente.
+// En esta version modificada, solo se avanzan las taquillas y la fila general.
+// Las peliculas se inician manualmente y las salidas se procesan individualmente.
 bool avanzarUnPaso(Sede &sede) {
-    if (salirUnCliente(sede)) return true;
-
-    int totalSalas = sede.salas.TotalSalas();
-    for (int i = 0; i < totalSalas; ++i) {
-        int nSala;
-        string pelicula;
-        if (!sede.salas.ObtenerSalaPorIndice(i, nSala, pelicula)) continue;
-        if (ingresarUnCliente(sede, nSala)) return true;
-    }
-
     int totalTaquillas = sede.cine.ObtListaTaquillas().Total();
     for (int i = 0; i < totalTaquillas; ++i) {
         Taquilla *t = obtenerTaquillaPorIndice(sede.cine, i);
@@ -529,6 +550,38 @@ void menuGestionTaquillas(Sede &sede) {
             t->setAbierta(!t->estaAbierta());
             cout << t->getNombreTaquilla() << " ahora esta "
                  << (t->estaAbierta() ? "ABIERTA" : "CERRADA") << "." << endl;
+
+            if (!t->estaAbierta()) {
+                // Redistribuir clientes al cerrar taquilla
+                Cola<Persona> &colaT = t->getColaTaquilla();
+                Persona cliente;
+                int reubicados = 0;
+                int alLobby = 0;
+                while (colaT.Remover(cliente)) {
+                    int mejorIdx = elegirTaquillaConCupo(sede.cine);
+                    if (mejorIdx >= 0) {
+                        Taquilla *mejorT = obtenerTaquillaPorIndice(sede.cine, mejorIdx);
+                        if (mejorT != NULL) {
+                            cliente.registrarEstatus("Reubicado a " + mejorT->getNombreTaquilla() + " por cierre");
+                            mejorT->recibirCliente(cliente);
+                            cout << "[REUBICACION] " << cliente.getNombre() << " paso a " << mejorT->getNombreTaquilla() << endl;
+                            reubicados++;
+                            continue;
+                        }
+                    }
+                    cliente.registrarEstatus("Enviado al lobby (taquillas llenas por cierre)");
+                    sede.esperaGeneral.Insertar(cliente);
+                    cout << "[REUBICACION] " << cliente.getNombre() << " enviado al lobby (Lobby)." << endl;
+                    alLobby++;
+                }
+                if (reubicados > 0 || alLobby > 0) {
+                    cout << "Se reubicaron " << reubicados << " clientes a otras taquillas y "
+                         << alLobby << " al lobby." << endl;
+                }
+            } else {
+                // Al abrir, intentar pasar personas del lobby a esta taquilla
+                repartirEsperaGeneral(sede);
+            }
         }
     } else if (sub == 3) {
         float p = leerPrecio("Precio del dia: ");

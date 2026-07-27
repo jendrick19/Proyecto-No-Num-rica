@@ -45,6 +45,7 @@ bool registrarCliente(Sede &sede);
 bool atenderUnCliente(Sede &sede, int indiceTaquilla);
 // 3. Entra a la sala: deja la fila de la sala y pasa a ver la funcion.
 bool ingresarUnCliente(Sede &sede, int nSala);
+bool iniciarFuncionSala(Sede &sede, int nSala);
 // 4. Termina la funcion y abandona el cine (aqui se muestra su historial).
 bool salirUnCliente(Sede &sede);
 

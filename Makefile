@@ -6,22 +6,12 @@ CXXFLAGS = -std=c++11 -I. -Iinclude
 FUENTES = core/Simulacion.cpp Cine/Cine.cpp persona/Persona.cpp \
           salas/Salas.cpp taquilla/Taquilla.cpp
 
-all: cine_etapas cine_pasoapaso
+all: cine_app
 
-# Version 1: cada etapa del recorrido es una opcion distinta del menu.
-cine_etapas:
-	$(CXX) $(CXXFLAGS) main_etapas.cpp $(FUENTES) -o cine_etapas.exe
-
-# Version 2: la simulacion avanza de a un cliente y un paso.
-cine_pasoapaso:
-	$(CXX) $(CXXFLAGS) main_pasoapaso.cpp $(FUENTES) -o cine_pasoapaso.exe
-
-# Version original, se conserva como referencia.
 cine_app:
-	$(CXX) $(CXXFLAGS) main.cpp Cine/Cine.cpp persona/Persona.cpp \
-	    salas/Salas.cpp taquilla/Taquilla.cpp -o cine_app.exe
+	$(CXX) $(CXXFLAGS) main.cpp $(FUENTES) -o cine_app.exe
 
 clean:
-	rm -f cine_etapas.exe cine_pasoapaso.exe cine_app.exe
+	rm -f cine_app.exe
 
-.PHONY: all cine_etapas cine_pasoapaso cine_app clean
+.PHONY: all cine_app clean

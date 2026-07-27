@@ -49,6 +49,7 @@ public:
     int TotalClientes(int nSala);
 
     void Mostrar();
+    void ProcesarTodasLasSalas();
 };
 
 #endif
