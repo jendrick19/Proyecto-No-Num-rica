@@ -40,10 +40,18 @@ void Cine::AsigPrecioDelDia(float precio) {
 }
 
 bool Cine::AgregarTaquilla(Taquilla nuevaTaquilla) {
-    if (listaTaquillas.Total() < 3) {
+    if (listaTaquillas.Total() >= 3) return false;
+
+    // Se inserta al final para que el orden del listado coincida con el orden
+    // en que se crearon las taquillas (InsComienzo las mostraba al reves).
+    if (listaTaquillas.Vacia()) {
         return listaTaquillas.InsComienzo(nuevaTaquilla);
     }
-    return false; 
+
+    nodo<Taquilla> *p = listaTaquillas.ObtPrimero();
+    while (p->ObtDer() != NULL) p = p->ObtDer();
+
+    return listaTaquillas.InsDerecho(p, nuevaTaquilla);
 }
 
 Lista<Taquilla>& Cine::ObtListaTaquillas() {

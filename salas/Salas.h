@@ -36,6 +36,9 @@ public:
     bool CambiarPelicula(int nSala, const std::string &nuevaPelicula);
     bool ObtenerPelicula(int nSala, std::string &pelicula);
 
+    // Permite recorrer la cartelera por posicion (0..TotalSalas()-1)
+    bool ObtenerSalaPorIndice(int indice, int &nSala, std::string &pelicula);
+
     bool EncolarCliente(int nSala, const Persona &cliente);
     bool AtenderCliente(int nSala, Persona &cliente);
     bool ObtenerCola(int nSala, Cola<Persona> *&cola);

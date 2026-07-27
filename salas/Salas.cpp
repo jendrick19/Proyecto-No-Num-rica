@@ -93,6 +93,25 @@ bool Salas::ObtenerPelicula(int nSala, std::string &pelicula) {
     return true;
 }
 
+bool Salas::ObtenerSalaPorIndice(int indice, int &nSala, std::string &pelicula) {
+    if (indice < 0) return false;
+
+    nodo<Sala> *p = listaSalas.ObtPrimero();
+    int actual = 0;
+
+    while (p != NULL) {
+        if (actual == indice) {
+            nSala = p->ObtInfo().nSala;
+            pelicula = p->ObtInfo().pelicula;
+            return true;
+        }
+        p = p->ObtDer();
+        ++actual;
+    }
+
+    return false;
+}
+
 bool Salas::EncolarCliente(int nSala, const Persona &cliente) {
     nodo<Sala> *p = buscarNodo(nSala);
     if (p == NULL) return false;
